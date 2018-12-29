@@ -559,3 +559,66 @@ fail.
 : Execution error (AssertionError) at user/fact-pre-post (REPL:1).
 : Assert failed: (integer? n)
 ** Chapter 6: Functional Things
+*** Functions are Values
+The point is that functions can be passed as values to other functions
+and called there.
+#+BEGIN_SRC clojure :results silent
+  (defn both? [predicate-1 predicate-2 object]
+    (when (and (predicate-1 object)
+               (predicate-2 object))
+      object))
+#+END_SRC
+#+BEGIN_SRC clojure :exports both
+  (both? integer? even? 20)
+#+END_SRC
+
+#+RESULTS:
+: 20
+You can use this with maps, too:
+#+BEGIN_SRC clojure :exports both :results raw
+  (let [book {:title "Dune" :author "Herbert" :genre :scifi}]
+    (list (both? :title :author book)
+          (both? :title :isbn book)))
+#+END_SRC
+
+#+RESULTS:
+({:title "Dune", :author "Herbert", :genre :scifi} nil)
+*** Functions on the Fly
+=fn= is used to create anonymous functions:
+#+BEGIN_SRC clojure :exports both
+  ((fn [n] (* 2 n)) 3)
+#+END_SRC
+
+#+RESULTS:
+: 6
+
+They also allow for closures (capture of variables from the
+environment):
+#+BEGIN_SRC clojure :exports both :results output
+  (defn make-multiplier [n]
+    (fn [x] (* n x)))
+
+  (println ((make-multiplier 2) 10))
+  (println ((make-multiplier 3) 10))
+#+END_SRC
+
+#+RESULTS:
+: 20
+: 30
+*** A Functional Toolkit
+=apply=, =partial=, =every-pred=, =complement= and others.
+*** Function Literals
+Can use =#(...)= to define a literal function, with %, %1, etc as the
+arguments.
+#+BEGIN_SRC clojure :exports both :results output
+  (defn make-adder [n]
+    #(+ n %))
+
+  (println ((make-adder 2) 10))
+  (println ((make-adder 3) 10))
+#+END_SRC
+
+#+RESULTS:
+: 12
+: 13
+** Chapter 7: Let
