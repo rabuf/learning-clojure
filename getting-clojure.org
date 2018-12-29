@@ -1,8 +1,9 @@
 #+STARTUP: indent contents
 #+OPTIONS: toc:nil num:nil
 * Getting Clojure
-** Chapter 1: Hello Clojure
-*** The Very Basics
+** Part I. Basics
+*** Chapter 1: Hello Clojure
+**** The Very Basics
 Starts out looking like lisp-meets-java (println being from java).
 #+BEGIN_SRC clojure :results output :exports both
   (println "Hello, world!")
@@ -26,7 +27,7 @@ Starts out looking like lisp-meets-java (println being from java).
 
 #+RESULTS:
 : 4
-*** Arithmetic
+**** Arithmetic
 #+BEGIN_SRC clojure :exports both
   (/ 1000 3)
 #+END_SRC
@@ -42,7 +43,7 @@ that's not a proper divisor of it. Convenient.
 #+RESULTS:
 : 333.3333333333333
 But floats stay floats.
-*** Not Variable Assignment, but Close
+**** Not Variable Assignment, but Close
 #+BEGIN_SRC clojure :exports both
   (def first-name "Russ")
 #+END_SRC
@@ -57,7 +58,7 @@ But floats stay floats.
 : Russ
 =def= binds things to names, they say to be careful with it. Guess
 I'll learn why later.
-*** A Function of Your Own
+**** A Function of Your Own
 #+BEGIN_SRC clojure :exports both
   (defn hello-world []
     (println "Hello, World!"))
@@ -125,7 +126,7 @@ that'll be executed in sequence:
 
 Like most lisps, the value of the last expression is the value
 returned by the function call.
-*** In the Wild
+**** In the Wild
 Now we're using lein to generate a new clojure application. I'm not
 sure how well I can make that work with org-mode.
 #+BEGIN_SRC shell
@@ -147,7 +148,7 @@ The initial version:
 #+END_SRC
 
 Modified:
-#+BEGIN_SRC clojure :tangle blottsbooks/src/blottsbooks/core.clj
+#+BEGIN_SRC clojure
   (ns blottsbooks.core
     (:gen-class))
   (defn say-welcome [what]
@@ -171,7 +172,7 @@ the proect.
 
 =def= and =defn= both use the same namespace (this is a lisp-1, like
 Scheme).
-*** Staying Out of Trouble
+**** Staying Out of Trouble
 Same kind of exceptions as in Java.
 #+BEGIN_SRC clojure :exports both
   (/ 100 0)
@@ -180,8 +181,8 @@ Same kind of exceptions as in Java.
 #+RESULTS:
 : class java.lang.ArithmeticExceptionclass java.lang.ArithmeticExceptionExecution error (ArithmeticException) at user/eval7119 (REPL:1).
 : Divide by zero
-** Chapter 2: Vectors and Lists
-*** One Thing After Another
+*** Chapter 2: Vectors and Lists
+**** One Thing After Another
 #+BEGIN_SRC clojure :exports both :results raw
   [1 2 3 4]
 #+END_SRC
@@ -204,7 +205,7 @@ They can also be nested:
 
 #+RESULTS:
 [1 "two" [3 2 1] "four"]
-*** A Toolkit of Functions
+**** A Toolkit of Functions
 =vector= will construct a vector from all its arguments
 #+BEGIN_SRC clojure :exports both :results raw
   (vector 1 "two" 3 "four")
@@ -224,7 +225,7 @@ access the internals of a vector by treating the vector as a function:
 
 #+RESULTS:
 (4 4)
-*** Growing Your Vectors
+**** Growing Your Vectors
 =conj= will return a new vector with the new element added to the end:
 #+BEGIN_SRC clojure :exports both :results raw
   (conj [1 2 3] 4)
@@ -241,7 +242,7 @@ vector:
 
 #+RESULTS:
 (1 2 3 4)
-*** Lists
+**** Lists
 Work much like vectors, and how you'd expect lists to work in a
 lisp. A gotcha: =conj= works differently if used with a vector or
 list. For a vector it adds to the /end/. For a list it adds to the
@@ -253,20 +254,20 @@ their reasons.
 
 #+RESULTS:
 (4 1 2 3)
-*** Lists versus Vectors
+**** Lists versus Vectors
 Some diagrams here illustrating the structure of both.
 
 They actually mention what I noticed about =conj= here.
 
 Lists are immutable in Clojure. So some nice consequences: count can
 cache the result in the list so list traversal isn't needed for it.
-*** Staying Out of Trouble
+**** Staying Out of Trouble
 Reminder that lists and vectors are immutable.
-*** In the Wild
+**** In the Wild
 Apparently most Clojure programmers and libraries use vectors over
 lists, good to know.
-** Chapter 3: Maps, Keywords, and Sets
-*** This Goes with That
+*** Chapter 3: Maps, Keywords, and Sets
+**** This Goes with That
 #+BEGIN_SRC clojure :exports both :results raw
   {"title" "Oliver Twist" "author" "Dickens" "published" 1838}
 #+END_SRC
@@ -295,7 +296,7 @@ They can be accessed two ways: =get= or by treating the map as a function (like 
 
 #+RESULTS:
 ("Oliver Twist" "Oliver Twist")
-*** Keywords
+**** Keywords
 Keywords are special kinds of symbols starting with a =:=. They're
 preferred to string (or other atoms) as the key for hash maps. They
 also let you access content when used in the function position:
@@ -308,7 +309,7 @@ also let you access content when used in the function position:
 
 #+RESULTS:
 ("Oliver Twist" "Oliver Twist" "Oliver Twist")
-*** Changing Your Map Without Changing It
+**** Changing Your Map Without Changing It
 =assoc= and =dissoc= allow you to add/remove elements of the
 map. These also work with vectors (vectors are like maps but with
 integers as the keys).
@@ -321,14 +322,14 @@ integers as the keys).
 
 #+RESULTS:
 ({:title "Dune", :author "Herbert"} {:title "Dune"} {:title "Dune", :author "Herbert"})
-*** Other Handy Map Functions
+**** Other Handy Map Functions
 =keys= returns the keys of a map as a list.
 
 =vals= returns the values of a map as a list.
 
 We also learn in this section that Clojure treats commas as
 whitespace.
-*** Sets
+**** Sets
 Sets are constructed with the literal:
 #+BEGIN_SRC clojure :exports both :results raw
   #{1 2 3}
@@ -360,21 +361,21 @@ to test membership:
 
 #+RESULTS:
 (1 nil)
-** Chapter 4: Logic
-*** The Fundamental If
+*** Chapter 4: Logic
+**** The Fundamental If
 Works like in Common Lisp. Takes truthy and falsy values (nil is
 synonymous with false, everything else is synonymous with
 true). Optional else expression.
-*** Asking a Question
+**** Asking a Question
 General things like equality testing (=) and its opposite, boolean
 expressions (not, and, or), and predicates (scheme-style, uses ?).
 
 Like in CL, =and= and =or= are short circuiting and return the last
 evaluated expression.
-*** Truthy and Falsy
+**** Truthy and Falsy
 Main takeaway: Empty collections aren't nil (including the empty
 list).
-*** Do and When
+**** Do and When
 =do= is like =progn= and returns the value of the last expression.
 
 =when= is the same as I'd expect, it's equivalent to:
@@ -383,7 +384,7 @@ list).
     (do <exprs>))
 #+END_SRC
 Without the explicit =do=.
-*** Dealing with Multiple Conditions
+**** Dealing with Multiple Conditions
 Clojure has a =cond= similar to Common Lisp's but not the same. Main
 difference is in CL there are implicit =progn='s, but not in Clojure.
 #+BEGIN_SRC clojure :exports both :results raw
@@ -404,7 +405,7 @@ There's also =case= which works similarly to in CL:
     :other-val :result
     default-value-is-last)
 #+END_SRC
-*** Throwing and Catching
+**** Throwing and Catching
 Looks a lot like in Java:
 #+BEGIN_SRC clojure :results output :exports both
   (try
@@ -423,8 +424,8 @@ Exceptions can be thrown manually like so:
 #+RESULTS:
 : class clojure.lang.ExceptionInfoclass clojure.lang.ExceptionInfoExecution error (ExceptionInfo) at user/eval7235 (REPL:1).
 : Something went wrong
-** Chapter 5: More Capable Functions
-*** One Function, Different Parameters
+*** Chapter 5: More Capable Functions
+**** One Function, Different Parameters
 Can handle multiple-arities for functions like so:
 #+BEGIN_SRC clojure :results silent
   (defn greet
@@ -439,7 +440,7 @@ Can handle multiple-arities for functions like so:
 #+RESULTS:
 : Welcome to Blotts Books Jared
 : Hey buddy
-*** Arguments with Wild Abandon
+**** Arguments with Wild Abandon
 =&= followed by a variable turns a function into a variadic function,
 able to take an arbitrary number of arguments.
 #+BEGIN_SRC clojure :results silent
@@ -452,7 +453,7 @@ able to take an arbitrary number of arguments.
 
 #+RESULTS:
 : (1 2 3 4 aoeu)
-*** Multimethods
+**** Multimethods
 With =defmulti= and =defmethod= we can specialize on a custom
 discriminator. Here's a silly collatz conjecture using multimethods:
 #+BEGIN_SRC clojure :results silent
@@ -482,7 +483,7 @@ discriminator. Here's a silly collatz conjecture using multimethods:
 
 The discriminator function is called on the parameter and used to
 select which method implementation to use.
-*** Deeply Recursive
+**** Deeply Recursive
 TCE isn't really a thing in Clojure, so there's a workaround for
 recursive calls: =recur= and =loop=.
 #+BEGIN_SRC clojure :results silent
@@ -505,7 +506,7 @@ recursive calls: =recur= and =loop=.
 #+END_SRC
 
 =loop= lets you do things a bit more cleanly.
-*** Docstrings
+**** Docstrings
 After the name of a function definition, a string can be included
 which is the "docstring" and clojure can look it up with the =doc=
 function:
@@ -532,7 +533,7 @@ class clojure.lang.Compiler$CompilerExceptionclass clojure.lang.Compiler$Compile
 / - failed: vector? at: [:fn-tail :arity-n :bodies :params] spec: :clojure.core.specs.alpha/param-list
 (/ (+ a b) 2) - failed: vector? at: [:fn-tail :arity-1 :params] spec: :clojure.core.specs.alpha/param-list
 #+end_example
-*** Pre and Post Conditions
+**** Pre and Post Conditions
 So this is cool. Seems to be along the lines of pre/post conditions in
 a design-by-contract style. I'm curious what the limitations are:
 #+BEGIN_SRC clojure :results silent
@@ -558,8 +559,8 @@ fail.
 : Assert failed: (> n 0)
 : Execution error (AssertionError) at user/fact-pre-post (REPL:1).
 : Assert failed: (integer? n)
-** Chapter 6: Functional Things
-*** Functions are Values
+*** Chapter 6: Functional Things
+**** Functions are Values
 The point is that functions can be passed as values to other functions
 and called there.
 #+BEGIN_SRC clojure :results silent
@@ -583,7 +584,7 @@ You can use this with maps, too:
 
 #+RESULTS:
 ({:title "Dune", :author "Herbert", :genre :scifi} nil)
-*** Functions on the Fly
+**** Functions on the Fly
 =fn= is used to create anonymous functions:
 #+BEGIN_SRC clojure :exports both
   ((fn [n] (* 2 n)) 3)
@@ -605,9 +606,9 @@ environment):
 #+RESULTS:
 : 20
 : 30
-*** A Functional Toolkit
+**** A Functional Toolkit
 =apply=, =partial=, =every-pred=, =complement= and others.
-*** Function Literals
+**** Function Literals
 Can use =#(...)= to define a literal function, with %, %1, etc as the
 arguments.
 #+BEGIN_SRC clojure :exports both :results output
@@ -621,12 +622,12 @@ arguments.
 #+RESULTS:
 : 12
 : 13
-** Chapter 7: Let
-*** A Local, Temporary Place for Your Stuff
+*** Chapter 7: Let
+**** A Local, Temporary Place for Your Stuff
 Basic intro to let and its purpose. I've already been using it, but it
 creates local variables, compared to =def= and =defn= which are
 globally visible.
-*** Let Over Fn
+**** Let Over Fn
 Variables declared in a =let= can be captured in closures, like I did
 with =make-multiplier= and =make-adder= above.
 #+BEGIN_SRC clojure :exports both :results output
@@ -646,7 +647,7 @@ with =make-multiplier= and =make-adder= above.
 I don't know if this is a Clojure thing or just this book, but they
 use =-f= as the suffix for functions that return functions. I'll try
 to adopt this.
-*** Variations on the Theme
+**** Variations on the Theme
 Neat, they have =if-let= and =when-let= that will perform a binding
 and, based on that, perform or not perform the next expression:
 #+BEGIN_SRC clojure :exports both :results output
@@ -663,8 +664,8 @@ and, based on that, perform or not perform the next expression:
 : Herbert
 NB: =let= functions like =let*= in CL, each assignment is done in
 series. This means they can refer back to earlier assignments.
-** Chapter 8: Def, Symbols, and Vars
-*** A Global, Stable Place for Your Stuff
+*** Chapter 8: Def, Symbols, and Vars
+**** A Global, Stable Place for Your Stuff
 More about =def= and =defn= being global. Also, =defn= is just
 shorthand for =def ... (fn...=:
 #+BEGIN_SRC clojure :results silent
@@ -674,15 +675,15 @@ shorthand for =def ... (fn...=:
   (defn increment [n]
     (+ 1 n))
 #+END_SRC
-*** Symbols Are Things
+**** Symbols Are Things
 Symbols have to be quoted to see them and not the thing bound to
 them. Same in CL and Scheme.
 
 Symbols are = to themselves, no need for eq, eql, or anything else.
-*** Bindings Are Things Too
+**** Bindings Are Things Too
 Can get the value or the symbol of a bound variable using =.get= and
 =.-sym=.
-*** Varying Your Vars
+**** Varying Your Vars
 There's notion of dynamic variables, like in CL, that can use a
 =binding= expression to redefine them within some context:
 #+BEGIN_SRC clojure :results output :exports both
@@ -704,3 +705,64 @@ There's notion of dynamic variables, like in CL, that can use a
 Like in CL they've adopted the =*...*= notation to indicate dynamic
 variables. They also have to be explicitly declared dynamic as done
 above.
+*** Chapter 9: Namespaces
+**** A Place for Your Vars
+We can use =ns= to (optionally) create a namespace and switch to it.
+**** Loading Namespaces
+They can be loaded using =require= as in:
+#+BEGIN_SRC clojure :results silent
+  (require 'clojure.data)
+#+END_SRC
+NB: The required naemspace has to be quoted here.
+**** A Namespace of Your Own
+Back to the Blotts Books example:
+#+BEGIN_SRC clojure :tangle blottsbooks/src/blottsbooks/core.clj
+  (ns blottsbooks.core
+    (:require blottsbooks.pricing)
+    (:gen-class))
+
+  (defn -main []
+    (println
+     (blottsbooks.pricing/discount-price
+      {:title "Emma" :price 9.99})))
+#+END_SRC
+NB: The namespace also describes its *path* in the filesystem. This is
+similar to Java's packages. To create a pricing namespace we'd need a
+file in the =blottsbooks= directory called =pricing.clj=:
+#+BEGIN_SRC clojure :tangle blottsbooks/src/blottsbooks/pricing.clj
+  (ns blottsbooks.pricing)
+
+  (def discount-rate 0.15)
+
+  (defn discount-price [book]
+    (- (:price book)
+       (* discount-rate (:price book))))
+#+END_SRC
+
+#+BEGIN_SRC shell :results output :exports both
+  (cd blottsbooks && lein run)
+#+END_SRC
+
+#+RESULTS:
+: 8.4915
+**** As and Refer
+=as= lets you rename a namespace to something more convenient. =refer=
+lets you import a specific symbol.
+#+BEGIN_SRC clojure
+  (ns blottsbooks.core
+    (:require [blottsbooks.pricing :as pricing])
+    (:gen-class))
+#+END_SRC
+
+Gives us a nice abbreviation so that
+=blottsbooks.pricing/discount-price= becomes =pricing/discount-price=.
+#+BEGIN_SRC clojure
+  (ns blottsbooks.core
+    (:require [blottsbooks.pricing :refer [discount-price]])
+    (:gen-class))
+#+END_SRC
+Would bring the =discount-price= function directly into scope.
+**** Namespaces, Symbols, and Keywords
+=*ns*= contains the current namespace, =ns-map= and =find-ns= can tell
+you about a namespace, etc.
+** Part II. Intermediate
