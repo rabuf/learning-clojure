@@ -266,3 +266,98 @@ Reminder that lists and vectors are immutable.
 Apparently most Clojure programmers and libraries use vectors over
 lists, good to know.
 ** Chapter 3: Maps, Keywords, and Sets
+*** This Goes with That
+#+BEGIN_SRC clojure :exports both :results raw
+  {"title" "Oliver Twist" "author" "Dickens" "published" 1838}
+#+END_SRC
+
+#+RESULTS:
+{"title" "Oliver Twist", "author" "Dickens", "published" 1838}
+
+Written a bit like property lists in Common Lisp, but with curly
+braces, these are actually hash maps. They can also be written with:
+#+BEGIN_SRC clojure :exports both :results raw
+  (hash-map
+   "title" "Oliver Twist"
+   "author" "Dickens"
+   "published" 1838)
+#+END_SRC
+
+#+RESULTS:
+{"author" "Dickens", "published" 1838, "title" "Oliver Twist"}
+
+They can be accessed two ways: =get= or by treating the map as a function (like with vector):
+#+BEGIN_SRC clojure :exports both :results raw
+  (let [book {"title" "Oliver Twist" "author" "Dickens" "published" 1838}]
+    (list (get book "title")
+          (book "title")))
+#+END_SRC
+
+#+RESULTS:
+("Oliver Twist" "Oliver Twist")
+*** Keywords
+Keywords are special kinds of symbols starting with a =:=. They're
+preferred to string (or other atoms) as the key for hash maps. They
+also let you access content when used in the function position:
+#+BEGIN_SRC clojure :exports both :results raw
+  (let [book {:title "Oliver Twist" :author "Dickens" :published 1838}]
+    (list (get book :title)
+          (book :title)
+          (:title book)))
+#+END_SRC
+
+#+RESULTS:
+("Oliver Twist" "Oliver Twist" "Oliver Twist")
+*** Changing Your Map Without Changing It
+=assoc= and =dissoc= allow you to add/remove elements of the
+map. These also work with vectors (vectors are like maps but with
+integers as the keys).
+#+BEGIN_SRC clojure :exports both :results raw
+  (let [book {:title "Dune" :author "Herbert"}]
+    (list book
+          (dissoc book :author)
+          book)) ;; demonstrating that maps are immutable
+#+END_SRC
+
+#+RESULTS:
+({:title "Dune", :author "Herbert"} {:title "Dune"} {:title "Dune", :author "Herbert"})
+*** Other Handy Map Functions
+=keys= returns the keys of a map as a list.
+
+=vals= returns the values of a map as a list.
+
+We also learn in this section that Clojure treats commas as
+whitespace.
+*** Sets
+Sets are constructed with the literal:
+#+BEGIN_SRC clojure :exports both :results raw
+  #{1 2 3}
+#+END_SRC
+
+#+RESULTS:
+#{1 3 2}
+
+Duplicates in a literal will cause an error. Membership is tested with
+=contains?=:
+
+#+BEGIN_SRC clojure :exports both :results raw
+  (contains? #{1 2 3 4} 4)
+#+END_SRC
+
+#+RESULTS:
+true
+
+Values can be inserted with =conj= and removed with =disj=. =conj=
+doesn't cause errors if a value is already a member of the set.
+
+Sets can also be used (like maps and vectors) in the function position
+to test membership:
+#+BEGIN_SRC clojure :results raw :exports both
+  (list
+   (#{1 2 3 4} 1)
+   (#{1 2 3 4} 5))
+#+END_SRC
+
+#+RESULTS:
+(1 nil)
+** Chapter 4: Logic
