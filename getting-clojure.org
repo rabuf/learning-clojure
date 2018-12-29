@@ -424,3 +424,138 @@ Exceptions can be thrown manually like so:
 : class clojure.lang.ExceptionInfoclass clojure.lang.ExceptionInfoExecution error (ExceptionInfo) at user/eval7235 (REPL:1).
 : Something went wrong
 ** Chapter 5: More Capable Functions
+*** One Function, Different Parameters
+Can handle multiple-arities for functions like so:
+#+BEGIN_SRC clojure :results silent
+  (defn greet
+    ([to-whom] (greet "Welcome to Blotts Books" to-whom))
+    ([message to-whom] (println message to-whom)))
+#+END_SRC
+#+BEGIN_SRC clojure :results output :exports both
+  (greet "Jared")
+  (greet "Hey" "buddy")
+#+END_SRC
+
+#+RESULTS:
+: Welcome to Blotts Books Jared
+: Hey buddy
+*** Arguments with Wild Abandon
+=&= followed by a variable turns a function into a variadic function,
+able to take an arbitrary number of arguments.
+#+BEGIN_SRC clojure :results silent
+  (defn foo [& args]
+    (println args))
+#+END_SRC
+#+BEGIN_SRC clojure :results output :exports both
+  (foo 1 2 3 4 "aoeu")
+#+END_SRC
+
+#+RESULTS:
+: (1 2 3 4 aoeu)
+*** Multimethods
+With =defmulti= and =defmethod= we can specialize on a custom
+discriminator. Here's a silly collatz conjecture using multimethods:
+#+BEGIN_SRC clojure :results silent
+  (defn odd-even-or-one [n]
+    (cond
+      (even? n) :even
+      (= 1 n) :one
+      (odd? n) :odd))
+
+  (defmulti collatz odd-even-or-one)
+
+  (defmethod collatz :one [n]
+    1)
+
+  (defmethod collatz :even [n]
+    (+ 1 (collatz (/ n 2))))
+
+  (defmethod collatz :odd [n]
+    (+ 1 (collatz (+ 1 (* 3 n)))))
+#+END_SRC
+#+BEGIN_SRC clojure :exports both
+  (collatz 129)
+#+END_SRC
+
+#+RESULTS:
+: 122
+
+The discriminator function is called on the parameter and used to
+select which method implementation to use.
+*** Deeply Recursive
+TCE isn't really a thing in Clojure, so there's a workaround for
+recursive calls: =recur= and =loop=.
+#+BEGIN_SRC clojure :results silent
+  (defn factorial
+    ([n] (factorial n 1))
+    ([n acc]
+     (if (= n 1)
+       acc
+       (recur
+        (- n 1)
+        (* n acc)))))
+
+  (defn fact-loop [n]
+    (loop [n n acc 1]
+      (if (= n 1)
+        acc
+        (recur
+         (- n 1)
+         (* n acc)))))
+#+END_SRC
+
+=loop= lets you do things a bit more cleanly.
+*** Docstrings
+After the name of a function definition, a string can be included
+which is the "docstring" and clojure can look it up with the =doc=
+function:
+#+BEGIN_SRC clojure :results output
+  (defn average
+    "Returns the average of a and b"
+    (/ (+ a b) 2))
+  (doc doc)
+  (doc average)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+-------------------------
+clojure.repl/doc
+([name])
+Macro
+  Prints documentation for a var or special form given its name,
+   or for a spec if given a keyword
+-------------------------
+user/average
+([a b])
+class clojure.lang.Compiler$CompilerExceptionclass clojure.lang.Compiler$CompilerExceptionSyntax error macroexpanding clojure.core/defn at (clojure:localhost:55664(clj)*:1:1).
+/ - failed: vector? at: [:fn-tail :arity-n :bodies :params] spec: :clojure.core.specs.alpha/param-list
+(/ (+ a b) 2) - failed: vector? at: [:fn-tail :arity-1 :params] spec: :clojure.core.specs.alpha/param-list
+#+end_example
+*** Pre and Post Conditions
+So this is cool. Seems to be along the lines of pre/post conditions in
+a design-by-contract style. I'm curious what the limitations are:
+#+BEGIN_SRC clojure :results silent
+  (defn fact-pre-post [n]
+    {:pre [(integer? n) (> n 0)]
+     :post [(integer? %)]}
+    (loop [n n acc 1]
+      (if (= n 1)
+        acc
+        (recur
+         (- n 1)
+         (* n acc)))))
+#+END_SRC
+Now an exception will be thrown when either the pre or post assertions
+fail.
+#+BEGIN_SRC clojure :exports both
+  (fact-pre-post -10)
+  (fact-pre-post 10.0)
+#+END_SRC
+
+#+RESULTS:
+: class java.lang.AssertionErrorclass java.lang.AssertionErrorclass java.lang.AssertionErrorclass java.lang.AssertionErrorExecution error (AssertionError) at user/fact-pre-post (REPL:1).
+: Assert failed: (> n 0)
+: Execution error (AssertionError) at user/fact-pre-post (REPL:1).
+: Assert failed: (integer? n)
+** Chapter 6: Functional Things
