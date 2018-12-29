@@ -873,3 +873,104 @@ was given until it's needed.
 #+RESULTS:
 : #'user/my-iterate(1 2 3 4 5)
 This will be useful for any kind of generator.
+*** Chapter 12: Destructuring
+**** Pry Open Your Data
+Destructuring bind is worked into let:
+#+BEGIN_SRC clojure :exports both :results output
+  (let [numbers [1 2 3]]
+    (let [[x y z] numbers]
+      (println (* x y z))))
+#+END_SRC
+
+#+RESULTS:
+: 6
+**** Getting Less than Everything
+Extra values are ignored if they don't have a variable mapping
+#+BEGIN_SRC clojure :exports both :results output
+  (let [numbers [1 2 3 4]]
+    (let [[x y z] numbers]
+      (println (* x y z))))
+#+END_SRC
+
+#+RESULTS:
+: 6
+#+BEGIN_SRC clojure :exports both :results output
+  (let [numbers [1 2 [3 4]]]
+    (let [[x y z] numbers]
+      (println (list x y z))))
+#+END_SRC
+
+#+RESULTS:
+: (1 2 [3 4])
+
+#+BEGIN_SRC clojure :exports both :results output
+  (let [numbers [1 2 [3 4]]]
+    (let [[x y [w z]] numbers]
+      (println (list x y z))))
+#+END_SRC
+
+#+RESULTS:
+: (1 2 4)
+
+And we can go more deeply into the structure.
+#+BEGIN_SRC clojure :exports both :results output
+  (let [numbers [1 2 [3 4]]]
+    (let [[x y [w z] a b] numbers]
+      (println (list x y z a b))))
+#+END_SRC
+
+#+RESULTS:
+: (1 2 4 nil nil)
+If nothing matches we get =nil= as a result.
+**** Destructuring in Sequence
+It works with any sequence:
+#+BEGIN_SRC clojure :exports both :results output
+  (let [name "Jane"]
+    (let [[a b c d] name]
+      (println a b c d)))
+#+END_SRC
+
+#+RESULTS:
+: J a n e
+**** Destructuring Function Arguments
+And it works with function arguments:
+#+BEGIN_SRC clojure :exports both :results output
+  (defn first-three-letters [[a b c]]
+    (list a b c))
+  (let [name "Jane"]
+    (println (first-three-letters name)))
+#+END_SRC
+
+#+RESULTS:
+: (J a n)
+**** Digging into Maps
+#+BEGIN_SRC clojure :exports both :results output
+  (let [book {:title "Dune" :author "Herbert" :year 1965 :genre "scifi"}]
+    (let [{title :title author :author} book]
+      (println title "by" author)))
+#+END_SRC
+
+#+RESULTS:
+: Dune by Herbert
+**** Diving into Nested Maps
+#+BEGIN_SRC clojure :exports both :results output
+  (let [book {:title "Dune" :author {:last "Herbert" :first "Frank"} :year 1965 :genre "scifi"}]
+    (let [{title :title {first :first last :last} :author} book]
+      (println title "by" first last)))
+#+END_SRC
+
+#+RESULTS:
+: Dune by Frank Herbert
+**** The Final Frontier: Mixing and Matching
+And all these can be used together (sequence and map destructuring).
+**** Going Further
+Can specify the desired keys and automatically have variables created
+by the same name:
+#+BEGIN_SRC clojure :exports both :results output
+  (let [book {:title "Dune" :author {:last "Herbert" :first "Frank"} :year 1965 :genre "scifi"}]
+    (let [{:keys [title] {:keys [first last] :as author} :author} book]
+      (println title "by" first last author)))
+#+END_SRC
+
+#+RESULTS:
+: Dune by Frank Herbert {:last Herbert, :first Frank}
