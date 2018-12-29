@@ -833,3 +833,43 @@ puts the argument at the end of the argument list. =->= puts it at the front
 #+RESULTS:
 | 59/20 | 17 |
 *** Chapter 11: Lazy Sequences
+**** Sequences Without End
+Can create an infinitely repeating sequence with =repeat=.
+#+BEGIN_SRC clojure :results silent
+  (def repeated-text (repeat "All work and no play..."))
+#+END_SRC
+Be careful not to ask for a print out of =repeated-text='s value in
+the REPL.
+
+This will work with most sequence functions (take, nth, first, rest,
+etc.).
+**** More Interesting Laziness
+=cycle= will repeat a sequence. =iterate= will generate the next
+values based on a passed in function and initial value.
+**** Lazy Friends
+=map=, =interleave=, =take= and others are lazy as well. They won't
+return results until they're asked for (such as to be printed in the
+REPL, again, be careful).
+#+BEGIN_SRC clojure :exports both
+  (def evens (map #(* % 2) (iterate inc 0)))
+  (def odds (map #(+ (* % 2) 1) (iterate inc 0)))
+  (take 5 (interleave evens odds))
+#+END_SRC
+
+#+RESULTS:
+: #'user/evens#'user/odds(0 1 2 3 4)
+**** Laziness in Practice
+Shows more combinations of lazy sequences.
+**** Behind the Scenes
+=lazy-seq= returns a sequence like =seq= but doesn't evaluate what it
+was given until it's needed.
+#+BEGIN_SRC clojure :exports both
+  (defn my-iterate [f x]
+    (cons x (lazy-seq (my-iterate f (f x)))))
+
+  (take 5 (my-iterate inc 1))
+#+END_SRC
+
+#+RESULTS:
+: #'user/my-iterate(1 2 3 4 5)
+This will be useful for any kind of generator.
