@@ -766,3 +766,70 @@ Would bring the =discount-price= function directly into scope.
 =*ns*= contains the current namespace, =ns-map= and =find-ns= can tell
 you about a namespace, etc.
 ** Part II. Intermediate
+*** Chapter 10: Sequences
+**** One Thing After Another
+=seq= will take any collection and return a sequence from it.
+**** A Universal Interface
+=first=, =rest=, =next=, etc. all take sequences. They actually take
+any collection and turn them into sequences and then return a result.
+**** A Rich Toolkit ...
+=sort=, =reverse=, =interleave=, =interpose=, =partition= are
+introduced.
+**** ... Made Richer with Functional Values
+=filter=, =some= are introduced. Filter removes everything that
+doesn't pass the predicate. Some returns true if anything passes the
+predicate.
+**** Map
+=map= applies a function to all members of a sequence.
+
+=for= is like =map= and builds a sequence result but looks like a for
+loop.
+#+BEGIN_SRC clojure :exports both 
+  (for [i [1 2 3 4 5 6]]
+    (even? i))
+#+END_SRC
+
+#+RESULTS:
+| false | true | false | true | false | true |
+**** Reduce
+=reduce= is a fold. Takes a function, initial value, and
+sequence. Repeatedly applying the function until the sequence is
+exhausted.
+#+BEGIN_SRC clojure :exports both
+  (reduce + 0 [1 2 3 4 5 6])
+#+END_SRC
+
+#+RESULTS:
+: 21
+**** Composing a Solution
+Shows stringing the above functions together to create a solution to a
+particular problem.
+**** Other Sources of Sequences
+=line-seq= takes a file and returns each line as a string in a
+sequence.
+
+=re-matches=, =re-seq= will return if something matches, or a sequence
+of all the matches.
+#+BEGIN_SRC clojure :exports both
+  (re-seq #"-?\d+" "-1 2 3 4 -10")
+#+END_SRC
+
+#+RESULTS:
+| -1 | 2 | 3 | 4 | -10 |
+**** In the Wild
+They finally explain =->>= which has shown up in a couple other
+places. It takes the result of a first expression and feeds it into
+the next, and repeats until all expressions have been called. =->>=
+puts the argument at the end of the argument list. =->= puts it at the front
+#+BEGIN_SRC clojure :exports both
+  (list (->> 100
+             (/ 5)
+             (- 3))
+        (-> 100
+            (/ 5)
+            (- 3)))
+#+END_SRC
+
+#+RESULTS:
+| 59/20 | 17 |
+*** Chapter 11: Lazy Sequences
