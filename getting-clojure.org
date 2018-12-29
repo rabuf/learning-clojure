@@ -241,3 +241,28 @@ vector:
 
 #+RESULTS:
 (1 2 3 4)
+*** Lists
+Work much like vectors, and how you'd expect lists to work in a
+lisp. A gotcha: =conj= works differently if used with a vector or
+list. For a vector it adds to the /end/. For a list it adds to the
+/beginning/. That's a peculiar difference to me, but I guess they had
+their reasons.
+#+BEGIN_SRC clojure :exports both :results raw
+  (conj '(1 2 3) 4) ;; => (4 1 2 3)
+#+END_SRC
+
+#+RESULTS:
+(4 1 2 3)
+*** Lists versus Vectors
+Some diagrams here illustrating the structure of both.
+
+They actually mention what I noticed about =conj= here.
+
+Lists are immutable in Clojure. So some nice consequences: count can
+cache the result in the list so list traversal isn't needed for it.
+*** Staying Out of Trouble
+Reminder that lists and vectors are immutable.
+*** In the Wild
+Apparently most Clojure programmers and libraries use vectors over
+lists, good to know.
+** Chapter 3: Maps, Keywords, and Sets
