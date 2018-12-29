@@ -1,0 +1,243 @@
+#+STARTUP: indent contents
+#+OPTIONS: toc:nil num:nil
+* Getting Clojure
+** Chapter 1: Hello Clojure
+*** The Very Basics
+Starts out looking like lisp-meets-java (println being from java).
+#+BEGIN_SRC clojure :results output :exports both
+  (println "Hello, world!")
+#+END_SRC
+
+#+RESULTS:
+: Hello, world!
+
+=str= converts its arguments to a string form and concatenates them.
+#+BEGIN_SRC clojure :exports both
+  (str 1 " " 2 " " 3)
+#+END_SRC
+
+#+RESULTS:
+: 1 2 3
+
+=count= returns the count of a sequence
+#+BEGIN_SRC clojure :exports both
+  (count "aoeu")
+#+END_SRC
+
+#+RESULTS:
+: 4
+*** Arithmetic
+#+BEGIN_SRC clojure :exports both
+  (/ 1000 3)
+#+END_SRC
+
+#+RESULTS:
+: 1000/3
+Creates rational numbers if you try to divide an integer by something
+that's not a proper divisor of it. Convenient.
+#+BEGIN_SRC clojure :exports both
+  (/ 1000.0 3)
+#+END_SRC
+
+#+RESULTS:
+: 333.3333333333333
+But floats stay floats.
+*** Not Variable Assignment, but Close
+#+BEGIN_SRC clojure :exports both
+  (def first-name "Russ")
+#+END_SRC
+
+#+RESULTS:
+: #'user/first-name
+#+BEGIN_SRC clojure :exports both
+  first-name
+#+END_SRC
+
+#+RESULTS:
+: Russ
+=def= binds things to names, they say to be careful with it. Guess
+I'll learn why later.
+*** A Function of Your Own
+#+BEGIN_SRC clojure :exports both
+  (defn hello-world []
+    (println "Hello, World!"))
+#+END_SRC
+
+#+RESULTS:
+: #'user/hello-world
+#+BEGIN_SRC clojure :exports both :results output
+  (hello-world)
+#+END_SRC
+
+#+RESULTS:
+: Hello, World!
+
+So a thing that trips me up, square-brackets are used to contain the
+argument list. I don't know why.
+
+#+BEGIN_SRC clojure :exports both
+  (defn say-welcome [what]
+    (println "Welcome to" what))
+#+END_SRC
+
+#+RESULTS:
+: #'user/say-welcome
+
+#+BEGIN_SRC clojure :exports both :results output
+  (say-welcome "The Jungle")
+#+END_SRC
+
+#+RESULTS:
+: Welcome to The Jungle
+
+=println= sticks an extra space between each item so don't put spaces
+in the strings unless you need them.
+
+#+BEGIN_SRC clojure :results silent
+  (defn average [a b]
+    (/ (+ a b) 2.0))
+#+END_SRC
+#+BEGIN_SRC clojure :exports both
+  (average 3 5)
+#+END_SRC
+
+#+RESULTS:
+: 4.0
+
+This is pretty much what I'd expect from a lisp. The last function in
+this section shows that a function can have multiple expressions
+that'll be executed in sequence:
+#+BEGIN_SRC clojure :results silent
+  (defn chatty-average [a b]
+    (println "chatty-average function called")
+    (println "** first argument:" a)
+    (println "** second argument:" b)
+    (/ (+ a b) 2.0))
+#+END_SRC
+#+BEGIN_SRC clojure :exports both :results output
+  (chatty-average 10 20)
+#+END_SRC
+
+#+RESULTS:
+: chatty-average function called
+: ** first argument: 10
+: ** second argument: 20
+
+Like most lisps, the value of the last expression is the value
+returned by the function call.
+*** In the Wild
+Now we're using lein to generate a new clojure application. I'm not
+sure how well I can make that work with org-mode.
+#+BEGIN_SRC shell
+  lein new app blottsbooks
+#+END_SRC
+
+#+RESULTS:
+: Generating a project called blottsbooks based on the 'app' template.
+
+The initial version:
+#+BEGIN_SRC clojure
+  (ns blottsbooks.core
+    (:gen-class))
+
+  (defn -main
+    "I don't do a whole lot ... yet."
+    [& args]
+    (println "Hello, World!"))
+#+END_SRC
+
+Modified:
+#+BEGIN_SRC clojure :tangle blottsbooks/src/blottsbooks/core.clj
+  (ns blottsbooks.core
+    (:gen-class))
+  (defn say-welcome [what]
+    (println "Welcome to" what))
+
+  (defn -main []
+    "Welcome people to the store."
+    (say-welcome "Blotts Books"))
+#+END_SRC
+
+#+BEGIN_SRC shell :results output
+  (cd blottsbooks && lein run)
+#+END_SRC
+
+#+RESULTS:
+: Welcome to Blotts Books
+
+So using org-mode for this is ok so far. But will get tedious
+later. In the future I'll want the org file in the base directory of
+the proect.
+
+=def= and =defn= both use the same namespace (this is a lisp-1, like
+Scheme).
+*** Staying Out of Trouble
+Same kind of exceptions as in Java.
+#+BEGIN_SRC clojure :exports both
+  (/ 100 0)
+#+END_SRC
+
+#+RESULTS:
+: class java.lang.ArithmeticExceptionclass java.lang.ArithmeticExceptionExecution error (ArithmeticException) at user/eval7119 (REPL:1).
+: Divide by zero
+** Chapter 2: Vectors and Lists
+*** One Thing After Another
+#+BEGIN_SRC clojure :exports both :results raw
+  [1 2 3 4]
+#+END_SRC
+
+#+RESULTS:
+[1 2 3 4]
+
+Square brackets define vectors, they can have mixed element types:
+#+BEGIN_SRC clojure :exports both :results raw
+  [1 "two" 3 "four"]
+#+END_SRC
+
+#+RESULTS:
+[1 "two" 3 "four"]
+
+They can also be nested:
+#+BEGIN_SRC clojure :exports both :results raw
+  [1 "two" [3 2 1] "four"]
+#+END_SRC
+
+#+RESULTS:
+[1 "two" [3 2 1] "four"]
+*** A Toolkit of Functions
+=vector= will construct a vector from all its arguments
+#+BEGIN_SRC clojure :exports both :results raw
+  (vector 1 "two" 3 "four")
+#+END_SRC
+
+#+RESULTS:
+[1 "two" 3 "four"]
+
+count, first, rest all work like you'd expect. Conveniently you can
+access the internals of a vector by treating the vector as a function:
+#+BEGIN_SRC clojure :exports both :results raw
+  (let [v [1 2 3 4]]
+    (list
+     (nth v 3) ;; = > 4
+     (v 3))) ;; => 4
+#+END_SRC
+
+#+RESULTS:
+(4 4)
+*** Growing Your Vectors
+=conj= will return a new vector with the new element added to the end:
+#+BEGIN_SRC clojure :exports both :results raw
+  (conj [1 2 3] 4)
+#+END_SRC
+
+#+RESULTS:
+[1 2 3 4]
+
+=cons= will put a new element at the front, but returns a list, not a
+vector:
+#+BEGIN_SRC clojure :exports both :results raw
+  (cons 1 [2 3 4])
+#+END_SRC
+
+#+RESULTS:
+(1 2 3 4)
