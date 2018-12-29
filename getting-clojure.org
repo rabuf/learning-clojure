@@ -361,3 +361,66 @@ to test membership:
 #+RESULTS:
 (1 nil)
 ** Chapter 4: Logic
+*** The Fundamental If
+Works like in Common Lisp. Takes truthy and falsy values (nil is
+synonymous with false, everything else is synonymous with
+true). Optional else expression.
+*** Asking a Question
+General things like equality testing (=) and its opposite, boolean
+expressions (not, and, or), and predicates (scheme-style, uses ?).
+
+Like in CL, =and= and =or= are short circuiting and return the last
+evaluated expression.
+*** Truthy and Falsy
+Main takeaway: Empty collections aren't nil (including the empty
+list).
+*** Do and When
+=do= is like =progn= and returns the value of the last expression.
+
+=when= is the same as I'd expect, it's equivalent to:
+#+BEGIN_SRC clojure
+  (if <expr>
+    (do <exprs>))
+#+END_SRC
+Without the explicit =do=.
+*** Dealing with Multiple Conditions
+Clojure has a =cond= similar to Common Lisp's but not the same. Main
+difference is in CL there are implicit =progn='s, but not in Clojure.
+#+BEGIN_SRC clojure :exports both :results raw
+  (cond
+    (< 100 50) 10
+    :else 20)
+#+END_SRC
+
+#+RESULTS:
+20
+
+=:else= instead of =t=
+
+There's also =case= which works similarly to in CL:
+#+BEGIN_SRC clojure
+  (case expr
+    :val :result
+    :other-val :result
+    default-value-is-last)
+#+END_SRC
+*** Throwing and Catching
+Looks a lot like in Java:
+#+BEGIN_SRC clojure :results output :exports both
+  (try
+    (/ 100 0)
+    (catch ArithmeticException e (println "Division by 0 is bad, mkay?")))
+#+END_SRC
+
+#+RESULTS:
+: Division by 0 is bad, mkay?
+
+Exceptions can be thrown manually like so:
+#+BEGIN_SRC clojure :exports both
+  (throw (ex-info "Something went wrong" {}))
+#+END_SRC
+
+#+RESULTS:
+: class clojure.lang.ExceptionInfoclass clojure.lang.ExceptionInfoExecution error (ExceptionInfo) at user/eval7235 (REPL:1).
+: Something went wrong
+** Chapter 5: More Capable Functions
