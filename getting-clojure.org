@@ -974,3 +974,69 @@ by the same name:
 
 #+RESULTS:
 : Dune by Frank Herbert {:last Herbert, :first Frank}
+*** Chapter 13: Records and Protocols
+**** The Trouble with Maps
+Mainly that they don't guarantee the presence of a key or their
+intent, and they're slower than dedicated structures since they're so
+generic.
+**** Striking a More Specific Bargain with Records
+#+BEGIN_SRC clojure :results silent
+  (defrecord FictionalCharacter[name appears-in author])
+  (def watson (->FictionalCharacter "John Watson" "Sign of the Four" "Doyle" ))
+  (def elizabeth (map->FictionalCharacter
+                  {:name "Elizabeth Bennet"
+                   :appears-in "Pride & Prejudice"
+                   :author "Austen"}))
+#+END_SRC
+
+Creating the record gives us (at least?) two constructors.
+**** Records are Maps
+So the same sort of behaviors from map work here:
+#+BEGIN_SRC clojure
+  (:name watson)
+#+END_SRC
+
+#+RESULTS:
+: John Watson
+And modifications can be made using assoc:
+#+BEGIN_SRC clojure
+  (def hound-watson (assoc watson :appears-in "The Hound of the Baskervilles"))
+  (:appears-in hound-watson)
+  (:appears-in watson)
+#+END_SRC
+
+#+RESULTS:
+: #'user/hound-watson"The Hound of the Baskervilles""Sign of the Four"
+And new keys can be used (they're still maps under the hood).
+**** The Record Advantage
+Accessing record keys are faster than in general maps. Get access to
+=instance?= test.
+**** Protocols
+Protocols are defined with:
+#+BEGIN_SRC clojure :results silent
+  (defprotocol Person
+    (full-name [this])
+    (greeting [this msg])
+    (description [this]))
+#+END_SRC
+They say what functions should be defined on compliant records:
+#+BEGIN_SRC clojure :results silent
+  (defrecord Employee[first-name last-name department]
+    Person ;; specifying the protocol
+    (full-name [this] (str first-name " " last-name))
+    (greeting [this msg] (str msg " " (:first-name this)))
+    (description [this]
+      (str (:first-name this) " works in " (:department this))))
+#+END_SRC
+**** Decentralized Polymorphism
+The protocol and record can be extended later:
+#+BEGIN_SRC clojure :results silent
+  (defprotocol Summonable
+    (summon [this]))
+
+  (extend-protocol Summonable
+    Employee
+    (summon [this] (str (full-name this) " please come to the front desk.")))
+#+END_SRC
+**** Record Confusion
+*** Chapter 14: Tests
