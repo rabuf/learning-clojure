@@ -622,3 +622,85 @@ arguments.
 : 12
 : 13
 ** Chapter 7: Let
+*** A Local, Temporary Place for Your Stuff
+Basic intro to let and its purpose. I've already been using it, but it
+creates local variables, compared to =def= and =defn= which are
+globally visible.
+*** Let Over Fn
+Variables declared in a =let= can be captured in closures, like I did
+with =make-multiplier= and =make-adder= above.
+#+BEGIN_SRC clojure :exports both :results output
+  (def discount-table {:alice 0.10 :bob 0.05})
+  (defn make-discount-f [person]
+    (let [discount (person discount-table)]
+      (fn [amount]
+        (* amount (- 1.0 discount)))))
+  (println ((make-discount-f :alice) 10))
+  (println ((make-discount-f :bob) 10))
+#+END_SRC
+
+#+RESULTS:
+: 9.0
+: 9.5
+
+I don't know if this is a Clojure thing or just this book, but they
+use =-f= as the suffix for functions that return functions. I'll try
+to adopt this.
+*** Variations on the Theme
+Neat, they have =if-let= and =when-let= that will perform a binding
+and, based on that, perform or not perform the next expression:
+#+BEGIN_SRC clojure :exports both :results output
+  (let [book {:author "Herbert" :title "Dune"}]
+    (if-let [genre (:genre book)]
+      (println genre)
+      (println "No genre."))
+    (when-let [author (:author book)]
+      (println author)))
+#+END_SRC
+
+#+RESULTS:
+: No genre.
+: Herbert
+NB: =let= functions like =let*= in CL, each assignment is done in
+series. This means they can refer back to earlier assignments.
+** Chapter 8: Def, Symbols, and Vars
+*** A Global, Stable Place for Your Stuff
+More about =def= and =defn= being global. Also, =defn= is just
+shorthand for =def ... (fn...=:
+#+BEGIN_SRC clojure :results silent
+  (def increment
+    (fn [n] (+ 1 n)))
+
+  (defn increment [n]
+    (+ 1 n))
+#+END_SRC
+*** Symbols Are Things
+Symbols have to be quoted to see them and not the thing bound to
+them. Same in CL and Scheme.
+
+Symbols are = to themselves, no need for eq, eql, or anything else.
+*** Bindings Are Things Too
+Can get the value or the symbol of a bound variable using =.get= and
+=.-sym=.
+*** Varying Your Vars
+There's notion of dynamic variables, like in CL, that can use a
+=binding= expression to redefine them within some context:
+#+BEGIN_SRC clojure :results output :exports both
+  (def ^:dynamic *book* {:author "Herbert" :title "Dune"})
+
+  (defn get-author []
+    (:author *book*))
+
+  (do
+    (println (get-author))
+    (binding [*book* {:author "Heinlein" :title "Stranger in a Strange Land"}]
+      (println (get-author))))
+#+END_SRC
+
+#+RESULTS:
+: Herbert
+: Heinlein
+
+Like in CL they've adopted the =*...*= notation to indicate dynamic
+variables. They also have to be explicitly declared dynamic as done
+above.
