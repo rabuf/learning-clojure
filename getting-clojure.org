@@ -1050,7 +1050,7 @@ The protocol and record can be extended later:
 | The default template is intended for library projects                  | not applications. |      |                      |
 | To see other templates (app                                            | plugin            | etc) | try `lein help new`. |
 
-#+BEGIN_SRC clojure :results silent :tangle inventory/src/inventory/core.clj
+#+BEGIN_SRC clojure :results silent
   (ns inventory.core)
 
   (defn find-by-title
@@ -1175,3 +1175,97 @@ Ran 1 tests containing 1 assertions.
 0 failures, 0 errors.
 :END:
 *** Chapter 15: Spec
+**** This Is the Data You’re Looking For
+Simple specs:
+#+BEGIN_SRC clojure
+  (s/valid? number? 44)
+  (s/valid? number? :aoeu)
+#+END_SRC
+
+#+RESULTS:
+: truefalse
+
+And we can make our own more complicated specs using things like s/and, s/or
+#+BEGIN_SRC clojure
+  (def n-gt-10 (s/and number? #(> % 10)))
+  (s/valid? n-gt-10 20)
+  (s/valid? n-gt-10 9)
+  (s/valid? n-gt-10 :aoeu)
+#+END_SRC
+
+#+RESULTS:
+: #'user/n-gt-10truefalsefalse
+**** Spec'ing Collections
+This tests that it's a collection of strings, but the spec could be
+more complex.
+#+BEGIN_SRC clojure
+  (def coll-of-strings (s/coll-of string?))
+  (s/valid? coll-of-strings '("aoeu" "snth"))
+#+END_SRC
+
+#+RESULTS:
+: #'user/coll-of-stringstrue
+
+#+BEGIN_SRC clojure :results silent
+  (def book-s
+    (s/keys :req-un [:inventory.core/title
+                     :inventory.core/author
+                     :inventory.core/copies]))
+#+END_SRC
+This will verify that the map has the proper keys.
+**** Registering Specs
+Specs can be registered globally so that others can use them.
+#+BEGIN_SRC clojure :results silent
+  (ns inventory.core
+    (:require [clojure.spec.alpha :as s]))
+
+  (defn find-by-title
+    "Search for a book by title, where title is a string and books is a
+    collection of books maps each of which must have a :title entry."
+    [title books]
+    (some #(when (= (:title %) title) %) books))
+
+  (defn number-of-copies
+    "Return the number of copies in inventory of the given title,
+    where title is a string and books is a collection of book maps each
+    of which must have a :title entry"
+    [title books]
+    (:copies (find-by-title title books)))
+
+  (s/def ::book (s/keys :req-un [::title ::author ::copies]))
+#+END_SRC
+**** Spec'ing Maps (again)
+We can use more specs ofr the keys.
+#+BEGIN_SRC clojure :results silent :tangle inventory/src/inventory/core.clj
+  (ns inventory.core
+    (:require [clojure.spec.alpha :as s])
+    (:require [clojure.spec.test.alpha :as st]))
+
+  (defn find-by-title
+    "Search for a book by title, where title is a string and books is a
+    collection of books maps each of which must have a :title entry."
+    [title books]
+    (some #(when (= (:title %) title) %) books))
+
+  (defn number-of-copies
+    "Return the number of copies in inventory of the given title,
+    where title is a string and books is a collection of book maps each
+    of which must have a :title entry"
+    [title books]
+    (:copies (find-by-title title books)))
+  (s/def ::title string?)
+  (s/def ::author string?)
+  (s/def ::copies int?)
+  (s/def ::book (s/keys :req-un [::title ::author ::copies]))
+  (s/def ::inventory (s/coll-of ::book))
+  (s/fdef find-by-title
+    :args (s/cat :title ::title
+                 :books ::inventory))
+#+END_SRC
+**** Why? Why? Why?
+=s/conform= and =s/explain= will help to understand where issues are.
+**** Function Specs
+With =clojure.spec.test= we can build specs for functions and
+instrument them to ensure valid input.
+**** Spec-Driven Tests
+Using the specs from above, we can generate input for testing.
