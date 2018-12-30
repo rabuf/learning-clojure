@@ -1040,3 +1040,138 @@ The protocol and record can be extended later:
 #+END_SRC
 **** Record Confusion
 *** Chapter 14: Tests
+**** Spotting Bugs with clojure.test
+#+BEGIN_SRC shell
+  lein new inventory
+#+END_SRC
+
+#+RESULTS:
+| Generating a project called inventory based on the 'default' template. |                   |      |                      |
+| The default template is intended for library projects                  | not applications. |      |                      |
+| To see other templates (app                                            | plugin            | etc) | try `lein help new`. |
+
+#+BEGIN_SRC clojure :results silent :tangle inventory/src/inventory/core.clj
+  (ns inventory.core)
+
+  (defn find-by-title
+    "Search for a book by title, where title is a string and books is a
+    collection of books maps each of which must have a :title entry."
+    [title books]
+    (some #(when (= (:title %) title) %) books))
+
+  (defn number-of-copies
+    "Return the number of copies in inventory of the given title,
+    where title is a string and books is a collection of book maps each
+    of which must have a :title entry"
+    [title books]
+    (:copies (find-by-title title books)))
+#+END_SRC
+
+#+BEGIN_SRC clojure :results silent
+  (ns inventory.core-test
+    (:require [clojure.test :refer :all]
+              [inventory.core :refer :all]))
+
+  (def books
+    [{:title "2001" :author "Clarke" :copies 21}
+     {:title "Emma" :autohr "Austen" :copies 10}
+     {:title "Misery" :author "King" :copies 101}])
+
+  (deftest test-finding-books
+    (is (not (nil? (find-by-title "Emma" books))))
+    (is (nil? (find-by-title "XYYZ" books))))
+
+  (deftest test-counting-copies
+    (testing "If copies are present"
+      (is (= 10 (number-of-copies "Emma" books))))
+    (testing "If copies aren't present"
+      (is (nil? (number-of-copies "XYYZ" books)))))
+#+END_SRC
+
+#+BEGIN_SRC shell :results drawer
+  (cd inventory && lein test)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+
+lein test inventory.core-test
+
+Ran 2 tests containing 4 assertions.
+0 failures, 0 errors.
+:END:
+**** Testing Namespaces and Projects
+Within clojure tests can be run with:
+#+BEGIN_SRC clojure :results silent
+  (test/run-tests)
+  (test/run-tests *ns*)
+  (test/run-tests 'inventory.core-test)
+#+END_SRC
+Or via =lein= on the command line as I did above.
+**** Property-Based Testing
+Quick check is available in the check.test namespace. It includes
+generators as well which can produce arbitrary data.
+#+BEGIN_SRC clojure :exports both :results drawer
+  (gen/sample gen/string-ascii)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+("" "%" "" "X\">" "Z" "~8" "_" "tbM^9" "uP>R" "gOO")
+:END:
+Further constraints can be added, like requiring that the strings not
+be emtpy:
+#+BEGIN_SRC clojure :exports both :results drawer
+  (gen/sample (gen/such-that not-empty gen/string-ascii))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+("!" "C" "`." "XEG" "v`" "3" "'\\o6WLw" "6C$NeKh" "~" "\"{e!OoE&")
+:END:
+Stringing these together, we can build up a more capable test suite
+with arbitrary data:
+#+BEGIN_SRC clojure :results silent :tangle inventory/test/inventory/core_test.clj
+  (ns inventory.core-test
+    (:require [clojure.test :refer :all]
+              [inventory.core :refer :all]
+              [clojure.test.check.clojure-test :as ctest]
+              [clojure.test.check :as tc]
+              [clojure.test.check.generators :as gen]
+              [clojure.test.check.properties :as prop]))
+
+  (def title-gen (gen/such-that not-empty gen/string-alphanumeric))
+  (def author-gen (gen/such-that not-empty gen/string-alphanumeric))
+  (def copies-gen (gen/such-that (complement zero?) gen/pos-int))
+
+  (def book-gen
+    (gen/hash-map :author author-gen :title title-gen :copies copies-gen))
+
+  (def inventory-gen
+    (gen/not-empty (gen/vector book-gen)))
+
+  (def inventory-and-book-gen
+    (gen/let [inventory inventory-gen
+              book (gen/elements inventory)]
+      {:inventory inventory :book book}))
+
+  (ctest/defspec find-by-title-finds-books 50
+    (prop/for-all [i-and-b inventory-and-book-gen]
+                  (= (find-by-title (-> i-and-b :book :title) (:inventory i-and-b))
+                     (:book i-and-b))))
+#+END_SRC
+
+#+BEGIN_SRC shell :results drawer
+  (cd inventory && lein test)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+
+lein test inventory.core-test
+{:result true, :num-tests 50, :seed 1546130499899, :test-var "find-by-title-finds-books"}
+
+Ran 1 tests containing 1 assertions.
+0 failures, 0 errors.
+:END:
+*** Chapter 15: Spec
